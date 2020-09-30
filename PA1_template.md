@@ -42,21 +42,34 @@ The variables included in this dataset are:
 * **interval**: Identifier for the 5-minute interval in which
     measurement was taken
 
-```{r, setup, include=FALSE}
-knitr::opts_chunk$set(fig.dim = c(6,4), collapse = TRUE)
-```
+
 
 
 ## Loading and preprocessing the data
 1.  Install libraries
 
 2.  Load and preprocess **[DATA](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip)**
-    ```{r, load, echo = TRUE} 
+    
+    ```r
     library(readr)
     library(ggplot2)
     library(knitr)
     library(dplyr)
+    ## 
+    ## Attaching package: 'dplyr'
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
     activity <- read_csv("activity.csv")
+    ## Parsed with column specification:
+    ## cols(
+    ##   steps = col_double(),
+    ##   date = col_date(format = ""),
+    ##   interval = col_double()
+    ## )
     ```
 
 
@@ -67,22 +80,30 @@ knitr::opts_chunk$set(fig.dim = c(6,4), collapse = TRUE)
 2. Create a histogram that represents steps per day
     
 3. Find the mean and median of steps per day
-    ```{r, stepsaday, echo = TRUE}
+    
+    ```r
     stepsaday <- aggregate(steps ~ date, activity, sum, na.rm=TRUE)
     
     hist(stepsaday$steps, col = "lightpink", main = "Steps per Day", xlab = "Steps")
+    ```
+    
+    ![](PA1_template_files/figure-html/stepsaday-1.png)<!-- -->
+    
+    ```r
     
     stepsadayMean <- mean(stepsaday$steps)
     stepsadayMean
+    ## [1] 10766.19
     
-
+    
     stepsadayMedian <- median(stepsaday$steps)
     stepsadayMedian
+    ## [1] 10765
     ```
 
-**The subject's mean steps a day is `r stepsadayMean`.**
+**The subject's mean steps a day is 1.0766189\times 10^{4}.**
 
-**The subject's median steps a day is `r stepsadayMedian`.**
+**The subject's median steps a day is 1.0765\times 10^{4}.**
 
 
 
@@ -92,15 +113,21 @@ knitr::opts_chunk$set(fig.dim = c(6,4), collapse = TRUE)
 
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-    ```{r, moststeps, echo = TRUE}
+    
+    ```r
     stepsaninterval<-aggregate(steps~interval, data=activity, mean,na.rm=TRUE)
     
     plot(steps~interval, data=stepsaninterval, type="l", main = "Steps per 5 Minute Interval", col = "darkgreen")
+    ```
+    
+    ![](PA1_template_files/figure-html/moststeps-1.png)<!-- -->
+    
+    ```r
     
     MostSteps <- stepsaninterval[which.max(stepsaninterval$steps),]$interval
     ```
 
-**Interval number `r MostSteps` contains the maximum number of steps.**
+**Interval number 835 contains the maximum number of steps.**
 
  
  
@@ -118,19 +145,27 @@ bias into some calculations or summaries of the data.
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the **mean** and **median** total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
     
-    ```{r, na, echo = TRUE}
+    
+    ```r
     stepsadayNoNA<- activity %>% 
                 replace(is.na(.), 0)
-
+    
     stepsaday2 <- aggregate(steps ~ date, stepsadayNoNA, sum, na.rm=TRUE)
     hist(stepsaday2$steps, main = "Adjusted Steps per Day", col = "pink", xlab = "Steps")
+    ```
+    
+    ![](PA1_template_files/figure-html/na-1.png)<!-- -->
+    
+    ```r
     stepsaday2Mean <- mean(stepsaday2$steps)
     stepsaday2Median <- median(stepsaday2$steps)
     stepsaday2Mean
+    ## [1] 9354.23
     stepsaday2Median
+    ## [1] 10395
     ```
 
-**The mean of the subject's steps per day imputing for NA variables is `r stepsaday2Mean` and the median is `r stepsaday2Median`.**
+**The mean of the subject's steps per day imputing for NA variables is 9354.2295082 and the median is 1.0395\times 10^{4}.**
 
 
 
@@ -142,8 +177,9 @@ Using the dataset with the filled-in missing values for this part:
 
 1. Make a panel plot containing a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
-    ```{r, weekdays, fig.dim = c(6,4), echo = TRUE}
- 
+    
+    ```r
+     
     stepsadayNoNA$RealDate <- as.Date(stepsadayNoNA$date, format = "%Y-%m-%d")
     stepsadayNoNA$weekday <- weekdays(stepsadayNoNA$RealDate)
     stepsadayNoNA$DayType <- ifelse(stepsadayNoNA$weekday=='Saturday' | stepsadayNoNA$weekday=='Sunday', 'weekend','weekday')
@@ -152,4 +188,6 @@ Using the dataset with the filled-in missing values for this part:
     patternGraphs <- ggplot(StepsPerTimeDT, aes(interval, steps))
     patternGraphs+geom_line(col= "darkgreen")+ggtitle("Average steps per time interval: weekdays vs. weekends")+xlab("Time")+ylab("Steps")+theme(plot.title = element_text(face="bold", size=12))+facet_grid(DayType ~ .)
     ```
+    
+    ![](PA1_template_files/figure-html/weekdays-1.png)<!-- -->
     
